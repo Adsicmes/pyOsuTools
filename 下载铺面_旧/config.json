@@ -1,0 +1,55 @@
+{
+    "params": {
+        "c": null,
+        "m": 0,
+        "s": null,
+        "nsfw": true,
+        "e": null,
+        "r": null,
+        "played": null,
+        "l": null,
+        "g": null
+    },
+    "api": {
+        "v2": {
+            "id": 6322,
+            "secret": "G5Dpfd1hAgAt8zkt0aFklV8bteaZITv1vC2bxcfO"
+        },
+        "login": {
+            "username": "wanna accuracy",
+            "password": "qwsa1234"
+        }
+    },
+    "total_length": {
+        "min": 120,
+        "max": 300
+    },
+    "ar": {
+        "min": 9,
+        "max": 10
+    },
+    "cs": {
+        "min": 0,
+        "max": 10
+    },
+    "od": {
+        "min": 0,
+        "max": 10
+    },
+    "hp": {
+        "min": 0,
+        "max": 10
+    },
+    "bpm": {
+        "min": 0,
+        "max": 1000
+    },
+    "star": {
+        "min": 6.2,
+        "max": 8
+    },
+    "count": 5,
+    "sayo_mirror": true,
+    "sayo_sem": 10,
+    "download_sem": 10
+}
