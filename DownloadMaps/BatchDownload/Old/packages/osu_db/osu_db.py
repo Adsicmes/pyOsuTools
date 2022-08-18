@@ -158,7 +158,7 @@ def read_osu_db(filepath: str) -> dict:
 
 def main():
     info = read_osu_db(r"C:\Users\abbey\AppData\Local\osu!\osu!.db")
-    with open('../../../Examples/osu_db.json', 'w') as f:
+    with open('../../../../../Examples/osu_db.json', 'w') as f:
         f.write(json.dumps(info))
 
 
