@@ -1,0 +1,36 @@
+{
+  "status": 0,
+  "data": [
+    {
+      "bid": 1853004,
+      "sid": 886402,
+      "title": "Daisy Blue",
+      "artist": "Kano",
+      "titleU": "Daisy Blue",
+      "artistU": "鹿乃",
+      "creator": "SquareTude",
+      "source": "",
+      "version": "Agatsu's Insane",
+      "submitted": 1546349966,
+      "ranked": 1546802404,
+      "star": 4.96005,
+      "CS": 4,
+      "AR": 9,
+      "HP": 5,
+      "OD": 8.3,
+      "maxcombo": 465,
+      "mode": 0,
+      "aim": 2.61805,
+      "speed": 2.06595,
+      "pp": 159.46,
+      "pp_aim": 69.36,
+      "BPM": 184,
+      "length": 96,
+      "playcount": 88911,
+      "passcount": 16848,
+      "favourite_count": 91,
+      "img": "0",
+      "video": ""
+    }
+  ]
+}
