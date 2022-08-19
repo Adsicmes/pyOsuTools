@@ -23,6 +23,26 @@ Finally switched to python3.8 to support win7.....
 - 没有需求，暂未开发...
 - Etc...
 
+## 如何使用下载？(How to download and use?)
+
+所有的软件打包都在`AllReleases`文件夹内
+
+All releases is in `AllReleases` folder
+
+教程文档在开发目录下
+
+Tutorial document in development directory
+
+比如批量下图，发行版以及版本差异文档在`AllReleases/DownloadMaps/BatchDownload/v2_x`
+
+软件使用文档在`DownloadMaps/BatchDownload/v2_x`
+
+Such as beatmapset batch downloader:
+
+The releases and version differences docs is in `AllReleases/DownloadMaps/BatchDownload/v2_x`
+
+How-to-use is in `DownloadMaps/BatchDownload/v2_x`
+
 ## 需要小软件？(免费的) (Need a new tool? (Its Free.) )
 
 需要小软件可以联系我，可以定制开发，一般不给收费，但写完的程序要求开源在本项目中。
