@@ -18,6 +18,8 @@ Finally switched to python3.8 to support win7.....
 
 - 批量下载铺面。不是非常好用，拥有些许bug，有要求也不会维护。
 - Batch download the beatmaps. It is not very good, and have a little bug, will not fix even if someone have requirements.
+- 批量下载铺面v2。已经可以使用，正在改善
+- Batch download the beatmaps version 2.x. Can be used now. And is coding to improve
 - 批量删除铺面。可以删除指定星数范围的铺面（仅支持std）。
 - Batch delete the beatmaps. Can delete the specified number of star range of beatmaps（Std Only）
 - 没有需求，暂未开发...
