@@ -1,3 +1,12 @@
+# import pywintypes
+# import win32api
+#
+# 必须如上这么导入，否则会报错
+# 即使ide显示为错误，实际运行不会出错
+# 仅python3.8下如此，其他版本暂未测试
+# 3.10可直接导入win32api无需导入pywintypes
+
+import pywintypes
 import win32api
 import win32con
 from getpass import getuser

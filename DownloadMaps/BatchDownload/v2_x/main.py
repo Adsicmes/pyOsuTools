@@ -257,6 +257,9 @@ async def main(params):
     if params['other']['mirror'] == 'official':
         await download_official(params, scraped_maps)
 
+    print(f"[green]下载完毕，按下回车退出")
+    print(f"[green]Download success. Press Enter to exit.")
+
 
 if __name__ == "__main__":
     api_params = {

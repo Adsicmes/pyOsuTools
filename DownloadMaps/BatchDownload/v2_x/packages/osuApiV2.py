@@ -8,6 +8,8 @@ from httpx import Response
 from lxml import etree
 from typing import *
 
+from typing import List
+
 
 class AsyncLoginClient:
     """
@@ -305,7 +307,7 @@ class AsyncApiClient:
         result: str = con.xpath('//script[@id="json-events"]/text()')[0]
         return json.loads(result.strip())
 
-    async def get_user(self, user: Union[int | str], key: str = "username", mode: str = "osu") -> dict:
+    async def get_user(self, user: Union[int, str], key: str = "username", mode: str = "osu") -> dict:
         """
         获取单个用户的信息
         :param key: 查询的用户的类型 可填"id"或"username" 默认"username"
@@ -327,7 +329,7 @@ class AsyncApiClient:
             mode: str = "osu",
             limit: int = 50,
             offset: int = 0
-    ) -> list | dict:
+    ) -> Union[list, dict]:
         """
         获取用户的分数 可以获取bp，recent, firsts(第一名)
         :param user: 用户id
@@ -349,7 +351,7 @@ class AsyncApiClient:
         resp = await self.api_client.get(url, params=params)
         return resp.json()
 
-    async def get_user_best(self, user: Union[str | int], mode: str = "osu") -> list:
+    async def get_user_best(self, user: Union[str, int], mode: str = "osu") -> list:
         """
         获取用户所有的bp，100个
         :param user: id或者name
@@ -367,7 +369,7 @@ class AsyncApiClient:
         all_scores = part1 + part2
         return all_scores
 
-    async def get_map_attributes(self, beatmap: int, mods: list[str] = None, ruleset: str = None):
+    async def get_map_attributes(self, beatmap: int, mods: List[str] = None, ruleset: str = None):
         """
         获取铺面带mod或转换模式后的具体信息
         :param beatmap: 铺面id
