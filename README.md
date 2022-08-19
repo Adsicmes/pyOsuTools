@@ -6,9 +6,13 @@
 
 ## 要求
 
-注意：我开发的软件仅仅支持win10及以上，不会为低版本系统添加支持。打不开程序的问题不予解决。(bug除外)
+~~注意：我开发的软件仅仅支持win10及以上，不会为低版本系统添加支持。打不开程序的问题不予解决。(bug除外)~~
 
-Note: Software I developed support only win10 and above, will not add support to low version of Windows. I will not solve any problems such as Cant open the application. (Except the bug)
+~~Note: Software I developed support only win10 and above, will not add support to low version of Windows. I will not solve any problems such as Cant open the application. (Except the bug)~~
+
+终究是切换到了python3.8，给win7提供了支持。。。
+
+Finally switched to python3.8 to support win7.....
 
 ## 目前的小软件列表 (Tools we have)
 
