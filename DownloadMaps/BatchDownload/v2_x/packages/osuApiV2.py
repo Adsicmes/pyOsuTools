@@ -20,6 +20,13 @@ class AsyncLoginClient:
         """
         self.login_client: httpx.AsyncClient = httpx.AsyncClient(timeout=timeout, verify=False)
 
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.logout()
+        return
+
     async def login(self, username: str, password: str):
         homepage = await self.login_client.get(r'https://osu.ppy.sh/home')
         regex = re.compile(r".*?csrf-token.*?content=\"(.*?)\">", re.DOTALL)
