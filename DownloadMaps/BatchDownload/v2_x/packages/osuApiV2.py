@@ -14,11 +14,11 @@ class AsyncLoginClient:
     非api不稳定，可能炸
     """
 
-    def __init__(self):
+    def __init__(self, timeout: int = 36000):
         """
         initial the session
         """
-        self.login_client: httpx.AsyncClient = httpx.AsyncClient(timeout=36000, verify=False)
+        self.login_client: httpx.AsyncClient = httpx.AsyncClient(timeout=timeout, verify=False)
 
     async def login(self, username: str, password: str):
         homepage = await self.login_client.get(r'https://osu.ppy.sh/home')
@@ -37,8 +37,19 @@ class AsyncLoginClient:
         """
         用于退出登录ppy
         """
-        headers = {"referer": r'https://osu.ppy.sh/home'}
-        await self.login_client.delete("https://osu.ppy.sh/session", headers=headers)
+        homepage = await self.login_client.get(r'https://osu.ppy.sh/home')
+        regex = re.compile(r".*?csrf-token.*?content=\"(.*?)\">", re.DOTALL)
+        match = regex.match(homepage.text)
+        csrf_token = match.group(1)
+
+        headers = {
+            "referer": r'https://osu.ppy.sh/home',
+            "x-csrf-token": csrf_token
+        }
+        cookies = {
+            "XSRF-TOKEN": csrf_token,
+        }
+        await self.login_client.delete("https://osu.ppy.sh/session", headers=headers, cookies=cookies)
 
     async def get_beatmapsets(self, sid: int) -> dict:
         """
@@ -94,11 +105,11 @@ class AsyncApiClient:
     api具有每分钟60次的访问限制
     """
 
-    def __init__(self):
+    def __init__(self, timeout: int = 36000):
         """
         initial the session
         """
-        self.api_client: httpx.AsyncClient = httpx.AsyncClient(timeout=36000, verify=False)
+        self.api_client: httpx.AsyncClient = httpx.AsyncClient(timeout=timeout, verify=False)
 
     async def initialization(self, client_id: int, client_secret: str) -> httpx.AsyncClient:
         """
