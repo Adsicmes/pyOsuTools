@@ -9,19 +9,18 @@ from lxml import etree
 from typing import *
 
 
-class AsyncPpyClient:
+class AsyncLoginClient:
     """
-    api具有每分钟60次的访问限制
     非api不稳定，可能炸
     """
+
     def __init__(self):
         """
         initial the session
         """
-        self.api_client: httpx.AsyncClient = httpx.AsyncClient(timeout=36000, verify=False)
         self.login_client: httpx.AsyncClient = httpx.AsyncClient(timeout=36000, verify=False)
 
-    async def init_login(self, username: str, password: str):
+    async def login(self, username: str, password: str):
         homepage = await self.login_client.get(r'https://osu.ppy.sh/home')
         regex = re.compile(r".*?csrf-token.*?content=\"(.*?)\">", re.DOTALL)
         match = regex.match(homepage.text)
@@ -33,6 +32,73 @@ class AsyncPpyClient:
         }
         headers = {"referer": r'https://osu.ppy.sh/home'}
         await self.login_client.post(r"https://osu.ppy.sh/session", data=data, headers=headers)
+
+    async def logout(self):
+        """
+        用于退出登录ppy
+        """
+        headers = {"referer": r'https://osu.ppy.sh/home'}
+        await self.login_client.delete("https://osu.ppy.sh/session", headers=headers)
+
+    async def get_beatmapsets(self, sid: int) -> dict:
+        """
+        非api
+        获取beatmapsets，返回详见Examples/osuApiV2/beatmapset.json
+        :param sid:
+        :return:
+        """
+        url = f'https://osu.ppy.sh/beatmapsets/{sid}'
+        resp = await self.login_client.get(url)
+        con = etree.HTML(resp.content, parser=etree.HTMLParser(encoding='utf-8'))
+        result: str = con.xpath('//script[@id="json-beatmapset"]/text()')[0]
+        return json.loads(result.strip())
+
+    async def download_beatmapset(self, sid: int, fp: str, nv: bool = False):
+        """
+        从官网下载指定的铺面
+        这是一个生成器，可以使用for循环进行循环
+        使用了yield返回True
+        返回的内容如下:
+            第一次返回的是会写入的次数(headers里的content-length/1024为总kb数，总kb数/16即为写入次数，一次写入16kb)
+            之后的yield返回的True全部代表为成功下载写入了一个区块
+        :param fp: 下载到的 文件路径
+        :param sid:
+        :param nv: 是否下载无视频  True下载无视频
+        :return:
+        """
+        url = f'https://osu.ppy.sh/beatmapsets/{sid}/download'
+        url = url + '?noVideo=1' if nv else url
+        headers = {'referer': f'https://osu.ppy.sh/beatmapsets/{sid}/'}
+
+        # 获取回调网址
+        resp = await self.login_client.get(url, follow_redirects=False, headers=headers)
+        redirect_download_url = resp.headers['location']
+
+        # 进入流下载
+        async with self.login_client.stream('GET', redirect_download_url) as stream:
+            # 获取写入次数
+            chunk_count = int(stream.headers['content-length']) / 1024 / 16
+            # 返回写入次数
+            yield int(chunk_count) + 1 if chunk_count > int(chunk_count) else chunk_count
+            # 异步写入文件
+            async with aiofiles.open(fp, 'wb') as f:
+                # 对所有的原始内容进行迭代
+                async for chunk in stream.aiter_raw():
+                    await f.write(chunk)
+                    # 返回信号，表示成功写入一次
+                    yield True
+
+
+class AsyncApiClient:
+    """
+    api具有每分钟60次的访问限制
+    """
+
+    def __init__(self):
+        """
+        initial the session
+        """
+        self.api_client: httpx.AsyncClient = httpx.AsyncClient(timeout=36000, verify=False)
 
     async def initialization(self, client_id: int, client_secret: str) -> httpx.AsyncClient:
         """
@@ -88,19 +154,6 @@ class AsyncPpyClient:
         id_str = id_str[:-1]
         resp: Response = await self.api_client.get(url, params={'ids[]': id_str})
         return resp.json()
-
-    async def get_beatmapsets(self, sid: int) -> dict:
-        """
-        非api
-        获取beatmapsets，返回详见Examples/osuApiV2/beatmapset.json
-        :param sid:
-        :return:
-        """
-        url = f'https://osu.ppy.sh/beatmapsets/{sid}'
-        resp = await self.login_client.get(url)
-        con = etree.HTML(resp.content, parser=etree.HTMLParser(encoding='utf-8'))
-        result: str = con.xpath('//script[@id="json-beatmapset"]/text()')[0]
-        return json.loads(result.strip())
 
     async def get_beatmapset_comments(self,
                                       sid: int,
@@ -211,7 +264,7 @@ class AsyncPpyClient:
             del params[key]
 
         url = r'https://osu.ppy.sh/beatmapsets/search'
-        resp = await self.login_client.get(url, params=params)
+        resp = await self.api_client.get(url, params=params)
         return resp.json()
 
     async def get_mp(self, mp_id: int) -> dict:
@@ -228,60 +281,105 @@ class AsyncPpyClient:
         result: str = con.xpath('//script[@id="json-events"]/text()')[0]
         return json.loads(result.strip())
 
-    async def download_beatmapset(self, sid: int, fp: str, nv: bool = False):
+    async def get_user(self, user: Union[int | str], key: str = "username", mode: str = "osu") -> dict:
         """
-        从官网下载指定的铺面
-        这是一个生成器，可以使用for循环进行循环
-        使用了yield返回True
-        返回的内容如下:
-            第一次返回的是会写入的次数(headers里的content-length/1024为总kb数，总kb数/16即为写入次数，一次写入16kb)
-            之后的yield返回的True全部代表为成功下载写入了一个区块
-        :param fp: 下载到的 文件路径
-        :param sid:
-        :param nv: 是否下载无视频  True下载无视频
+        获取单个用户的信息
+        :param key: 查询的用户的类型 可填"id"或"username" 默认"username"
+        :param user: 用户名或者id
+        :param mode: 模式的字符串 详见 https://osu.ppy.sh/docs/index.html#gamemode
         :return:
         """
-        url = f'https://osu.ppy.sh/beatmapsets/{sid}/download'
-        url = url + '?noVideo=1' if nv else url
-        headers = {'referer': f'https://osu.ppy.sh/beatmapsets/{sid}/'}
+        params = {"key": key}
 
-        # 获取回调网址    
-        resp = await self.login_client.get(url, follow_redirects=False, headers=headers)
-        redirect_download_url = resp.headers['location']
+        url = f"https://osu.ppy.sh/api/v2/users/{user}/{mode}"
+        resp = await self.api_client.get(url, params=params)
+        return resp.json()
 
-        # 进入流下载
-        async with self.login_client.stream('GET', redirect_download_url) as stream:
-            # 获取写入次数
-            chunk_count = int(stream.headers['content-length'])/1024/16
-            # 返回写入次数
-            yield int(chunk_count) + 1 if chunk_count > int(chunk_count) else chunk_count
-            # 异步写入文件
-            async with aiofiles.open(fp, 'wb') as f:
-                # 对所有的原始内容进行迭代
-                async for chunk in stream.aiter_raw():
-                    await f.write(chunk)
-                    # 返回信号，表示成功写入一次
-                    yield True
+    async def get_user_scores(
+            self,
+            user: int,
+            score_type: str,
+            include_fails: int = 0,
+            mode: str = "osu",
+            limit: int = 50,
+            offset: int = 0
+    ) -> list | dict:
+        """
+        获取用户的分数 可以获取bp，recent, firsts(第一名)
+        :param user: 用户id
+        :param score_type: 分数类型 可选best, firsts, recent
+        :param include_fails: 是否包含fail的成绩 0是不包含 1是包含
+        :param mode: 游戏模式 默认"osu" 详见 https://osu.ppy.sh/docs/index.html#gamemode
+        :param limit: 一次请求限制 最大50
+        :param offset: 查询偏移
+        :return:
+        """
+        params = {
+            "include_fails": include_fails,
+            "mode": mode,
+            "limit": limit,
+            "offset": offset
+        }
+        url = f"https://osu.ppy.sh/api/v2/users/{user}/scores/{score_type}"
 
+        resp = await self.api_client.get(url, params=params)
+        return resp.json()
 
-class PpyClient:
-    def __init__(self):
-        pass
+    async def get_user_best(self, user: Union[str | int], mode: str = "osu") -> list:
+        """
+        获取用户所有的bp，100个
+        :param user: id或者name
+        :param mode: 游戏模式 默认”osu“
+        :return:
+        """
+        if type(user) == str:
+            user_id = (await self.get_user(user))['id']
+        else:
+            user_id = user
+
+        part1 = await self.get_user_scores(user_id, score_type='best', mode=mode)
+        part2 = await self.get_user_scores(user_id, score_type='best', mode=mode, offset=50)
+
+        all_scores = part1 + part2
+        return all_scores
+
+    async def get_map_attributes(self, beatmap: int, mods: list[str] = None, ruleset: str = None):
+        """
+        获取铺面带mod或转换模式后的具体信息
+        :param beatmap: 铺面id
+        :param mods: 铺面mod列表，如["HR", "HD"]
+        :param ruleset: 游戏模式，默认为铺面默认模式，为字符串
+        :return:
+        """
+        url = f"https://osu.ppy.sh/api/v2/beatmaps/{beatmap}/attributes"
+
+        data = {}
+
+        if mods:
+            # mod_to_post = []
+            # if 'HR' in mod_to_post:
+            #     mod_to_post += 'HR'
+            # if 'DT' in mod_to_post or "NC" in mod_to_post:
+            #     mod_to_post += 'DT'
+            # if 'FL' in mod_to_post:
+            #     mod_to_post += 'FL'
+            # if 'EZ' in mod_to_post:
+            #     mod_to_post += 'EZ'
+            # if 'HT' in mod_to_post:
+            #     mod_to_post += 'HT'
+
+            data["mods[]"] = mods
+
+        if ruleset:
+            data['ruleset'] = ruleset
+
+        resp = await self.api_client.post(url, data=data)
+
+        return resp.json()
 
 
 async def main():
-    client = AsyncPpyClient()
-    await client.initialization(6322, "G5Dpfd1hAgAt8zkt0aFklV8bteaZITv1vC2bxcfO")
-
-    await client.init_login('wanna accuracy', 'qwsa1234')
-
-    n = 0
-    async for i in client.download_beatmapset(705224, "download.osz", nv=True):
-        if n == 0:
-            total: int = i
-            print(f'总区块数量为{total}')
-        print(n, end='\r')
-        n += 1
+    client = AsyncApiClient()
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
