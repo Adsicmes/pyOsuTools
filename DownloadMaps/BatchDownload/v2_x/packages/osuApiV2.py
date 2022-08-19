@@ -99,6 +99,86 @@ class AsyncLoginClient:
                     # 返回信号，表示成功写入一次
                     yield True
 
+    async def search_beatmaps(
+            self,
+            params: dict = None,
+            q: str = None,
+            c: str = None,
+            m: int = None,
+            s: str = None,
+            nsfw: bool = True,
+            e: str = None,
+            r: str = None,
+            played: str = None,
+            l: int = None,
+            g: int = None,
+            cursor_string: str = None,
+            sort: str = None
+    ) -> dict:
+        """
+        played和r只能撒泼特使用
+        以下参数需要组合使用'.'连接
+        是否可以组合用 Y/N 表示
+
+        :param params:
+            自定义参数列表，若本参数不为空，则其他参数无效
+        :param q:
+            osu搜索框
+        :param c: Y
+            recommended(推荐难度) converts(包括转铺) follows(已关注铺师) spotlights(聚光灯) featured_artists(精选艺术家)
+        :param m: N
+            0=std 1=taiko 2=catch 3=mania
+        :param s: N
+            any 不填(计入排名) ranked qualified loved favourites(收藏夹) pending wip(制作中) graveyard mine(我的)
+        :param nsfw: N
+            bool值
+        :param e: Y
+            video storyboard
+        :param r: Y
+            XH X SH S A B C D
+        :param played: N
+            played unplayed
+        :param l: N
+            1=未指定 2=English 3=Japanese 4=Chinese 5=Instrumental 6=Korean 7=French 8=Germany
+            9=Swedish 10=Spanish 11=Italian 12=Russian 13=Polish 14=others
+        :param g: N
+            1=未指定 2=电子游戏 3=动漫 4=摇滚 5=流行乐 6=其他 7=新奇 9=嘻哈 10=电子 11=金属 12=古典 13=民谣 14=爵士
+        :param cursor_string:
+            用于接续之前的搜索
+        :param sort:
+            返回结果的排序
+        :return:
+        """
+        if params is None:
+            params = {
+                'q': q,
+                'c': c,
+                'm': m,
+                's': s,
+                'nsfw': nsfw,
+                'e': e,
+                'r': r,
+                'played': played,
+                'l': l,
+                'g': g,
+                'cursor_string': cursor_string,
+                'sort': sort
+            }
+        else:
+            params = params
+
+        # 清除为空的参数
+        del_list = []
+        for key, value in params.items():
+            if value is None:
+                del_list.append(key)
+        for key in del_list:
+            del params[key]
+
+        url = r'https://osu.ppy.sh/beatmapsets/search'
+        resp = await self.login_client.get(url, params=params)
+        return resp.json()
+
 
 class AsyncApiClient:
     """
@@ -110,6 +190,12 @@ class AsyncApiClient:
         initial the session
         """
         self.api_client: httpx.AsyncClient = httpx.AsyncClient(timeout=timeout, verify=False)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        return
 
     async def initialization(self, client_id: int, client_secret: str) -> httpx.AsyncClient:
         """
@@ -195,86 +281,6 @@ class AsyncApiClient:
             'cursor[votes_count]': cursor_votes_count
         }
         url = r'https://osu.ppy.sh/comments'
-        resp = await self.api_client.get(url, params=params)
-        return resp.json()
-
-    async def search_beatmaps(
-            self,
-            params: dict = None,
-            q: str = None,
-            c: str = None,
-            m: int = None,
-            s: str = None,
-            nsfw: bool = True,
-            e: str = None,
-            r: str = None,
-            played: str = None,
-            l: int = None,
-            g: int = None,
-            cursor_string: str = None,
-            sort: str = None
-    ) -> dict:
-        """
-        played和r只能撒泼特使用
-        以下参数需要组合使用'.'连接
-        是否可以组合用 Y/N 表示
-
-        :param params:
-            自定义参数列表，若本参数不为空，则其他参数无效
-        :param q:
-            osu搜索框
-        :param c: Y
-            recommended(推荐难度) converts(包括转铺) follows(已关注铺师) spotlights(聚光灯) featured_artists(精选艺术家)
-        :param m: N
-            0=std 1=taiko 2=catch 3=mania
-        :param s: N
-            any 不填(计入排名) ranked qualified loved favourites(收藏夹) pending wip(制作中) graveyard mine(我的)
-        :param nsfw: N
-            bool值
-        :param e: Y
-            video storyboard
-        :param r: Y
-            XH X SH S A B C D
-        :param played: N
-            played unplayed
-        :param l: N
-            1=未指定 2=English 3=Japanese 4=Chinese 5=Instrumental 6=Korean 7=French 8=Germany
-            9=Swedish 10=Spanish 11=Italian 12=Russian 13=Polish 14=others
-        :param g: N
-            1=未指定 2=电子游戏 3=动漫 4=摇滚 5=流行乐 6=其他 7=新奇 9=嘻哈 10=电子 11=金属 12=古典 13=民谣 14=爵士
-        :param cursor_string:
-            用于接续之前的搜索
-        :param sort:
-            返回结果的排序
-        :return:
-        """
-        if params is None:
-            params = {
-                'q': q,
-                'c': c,
-                'm': m,
-                's': s,
-                'nsfw': nsfw,
-                'e': e,
-                'r': r,
-                'played': played,
-                'l': l,
-                'g': g,
-                'cursor_string': cursor_string,
-                'sort': sort
-            }
-        else:
-            params = params
-
-        # 清除为空的参数
-        del_list = []
-        for key, value in params.items():
-            if value is None:
-                del_list.append(key)
-        for key in del_list:
-            del params[key]
-
-        url = r'https://osu.ppy.sh/beatmapsets/search'
         resp = await self.api_client.get(url, params=params)
         return resp.json()
 
@@ -390,7 +396,11 @@ class AsyncApiClient:
 
 
 async def main():
-    client = AsyncApiClient()
+    client = AsyncLoginClient()
+    await client.login("wanna accuracy", "qwsa1234")
+    await client.get_beatmapsets(1825999)
+    await client.logout()
+
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
