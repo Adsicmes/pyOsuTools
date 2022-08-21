@@ -65,8 +65,6 @@ Delete all and use it as the first time.
 - Suggests to choose one between `created` and `ranked`. Avoid to use them at the same time.
 - 如果为`null`，那么这个参数将被忽略
 - If some value is `null`, it will be ignored
-- 目前没有支持小夜镜像站，请把镜像改为`official`
-- Dont support sayobot mirror now. Please change mirror to `official`
 
 # 详细的参数解释 (Detailed parameters)
 
