@@ -14,6 +14,9 @@ from rich.table import Table
 from packages.osuDirs import osuDirGet, songsDir
 from packages.osu_db.osu_db import read_osu_db
 from packages.osuApiV2 import AsyncLoginClient
+from packages.sayobotApi import AsyncSayobot
+
+from loguru import logger
 
 
 illegal_chars = re.compile(r"[\<\>:\"\/\\\|\?*]")
@@ -183,18 +186,30 @@ def download_progress_define(total_count):
     return download_progress, total_progress, progress_table, total_task
 
 
-async def download_official(params, scraped_maps):
+async def download_maps(params, scraped_maps, client):
     """
     使用官方下载源进行下载
+
+    :param params: 原生的参数字典(bushi
+    :param scraped_maps: 搜来的铺面列表，其中每个字典必须含有id artist title三个字段
+    :param client: 已初始化完毕的api类，必须含有可调用的download_beatmapset类
+
+    download_beatmapset类的要求:
+        异步函数
+        传入两个参数，第一个为sid，第二个为路径(精确到文件)
+        函数为一个生成器，使用yield返回值
+        下载方式为流下载
+        第一次返回总区块数
+        之后完成写入一个区块返回一次True
     """
     @retry(retry_on_exception=on_download_error)
-    async def official_download(download_progress, total_progress, login_client, beatmapset, songs_dir, sem):
+    async def download(download_progress, total_progress, client, beatmapset, songs_dir, sem):
         """
         定义了单个铺面下载时的函数
         """
         async with sem:
             n = 0
-            async for i in login_client.download_beatmapset(
+            async for i in client.download_beatmapset(
                     beatmapset['id'],
                     f"{songs_dir}{beatmapset['id']} {illegal_chars.sub('_', beatmapset['artist'])} - {illegal_chars.sub('_', beatmapset['title'])}.osz"
             ):
@@ -211,7 +226,7 @@ async def download_official(params, scraped_maps):
     download_progress, total_progress, progress_table, total_task = download_progress_define(len(scraped_maps))
 
     # 并发数设置
-    sem = asyncio.Semaphore(params['other']['official_sem']['download'])
+    sem = asyncio.Semaphore(params['other']['download_sem'])
 
     # 初始化ppy客户端
     login_client = AsyncLoginClient()
@@ -222,14 +237,8 @@ async def download_official(params, scraped_maps):
 
     # 设置并发任务
     tasks = [
-        official_download(
-            download_progress=download_progress,
-            total_progress=total_progress,
-            login_client=login_client,
-            beatmapset=beatmapset,
-            songs_dir=songs_dir,
-            sem=sem
-        )
+        download(download_progress=download_progress, total_progress=total_progress, client=client,
+                 beatmapset=beatmapset, songs_dir=songs_dir, sem=sem)
         for beatmapset in scraped_maps
     ]
 
@@ -257,11 +266,36 @@ async def main(params):
     print(f"开始下载查询到的铺面")
     print(f"Start download scraped maps")
 
-    if params['other']['mirror'] == 'official':
-        await download_official(params, scraped_maps)
+    mirror = params['other']['mirror']
+
+    print(f"[yellow]参数内填写的是{mirror}")
+    print(f"[yellow]Its '{mirror}' you fill in your config.json")
+
+    try:
+        if mirror == 'official':
+            client = AsyncLoginClient()
+            await client.login(
+                params['api']['username'],
+                params['api']['password']
+            )
+        elif mirror == 'sayobot':
+            client = AsyncSayobot()
+        else:
+            client = None
+            print(f"[red]镜像参数填写有误,或不支持或填写错误 - {mirror}")
+            print(f"[red]Error on param mirror. May not support {mirror}")
+            print(f"按下回车退出")
+            print(f"Press Enter to exit.")
+            input()
+            exit(1)
+
+        await download_maps(params, scraped_maps, client)
+    except Exception as e:
+        logger.exception(e)
 
     print(f"[green]下载完毕，按下回车退出")
     print(f"[green]Download success. Press Enter to exit.")
+    input()
 
 
 if __name__ == "__main__":
@@ -337,14 +371,7 @@ if __name__ == "__main__":
     other_params = {
         "count": 200,
         "mirror": "sayobot",
-        "sayo_sem": {
-            "query": 30,
-            "download": 10,
-            "use_official": False
-        },
-        "official_sem": {
-            "download": 5
-        }
+        "download_sem": 10
     }
 
     params = {

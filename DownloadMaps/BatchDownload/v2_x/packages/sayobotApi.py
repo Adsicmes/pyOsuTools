@@ -12,6 +12,14 @@ class AsyncSayobot:
             "referer": referer,
             "user_agent": user_agent
         }
+
+        key_del = []
+        for key, value in headers.items():
+            if value is None:
+                key_del.append(key)
+        for key in key_del:
+            del headers[key]
+
         self.client = httpx.AsyncClient(headers=headers, verify=False, timeout=36000)
 
     async def beatmap_info_v1(self,

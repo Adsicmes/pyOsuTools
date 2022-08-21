@@ -29,6 +29,7 @@ It is an osu pavement batch downloader. It can get a specifies quantity of beatm
 |cs|不解释 (will not explain)|
 |hp|不解释 (will not explain)|
 |length|不解释 (will not explain)|
+|bpm|不解释 (will not explain)|
 
 # 怎么使用(How-to-use)
 
@@ -38,7 +39,7 @@ Download this repo and switch to python3.8 and `pip install -r requirements.txt1
 
 或者直接在`AllReleases`文件夹内下载打包好的程序
 
-Or you can download release application in `AllReleases` folder.
+Or you can download release applicatoin in `AllReleases` folder.
 
 #### 第一次使用 (First use)
 
@@ -59,13 +60,13 @@ Delete all and use it as the first time.
 #### tips:
 
 - 使用ranked参数之后，即使没有指定铺面状态，也只会出现loved和ranked铺面
-- When use parameter ranked. Even if you didn't specify the status of map, there will be only loved and ranked.
+- When use parameter ranked. Even if you didnt specify the status of map, there will be only loved and ranked.
 - 建议created和ranked参数二选一进行使用
 - Suggests to choose one between `created` and `ranked`. Avoid to use them at the same time.
 - 如果为`null`，那么这个参数将被忽略
 - If some value is `null`, it will be ignored
 - 目前没有支持小夜镜像站，请把镜像改为`official`
-- Don't support sayobot mirror now. Please change mirror to `official`
+- Dont support sayobot mirror now. Please change mirror to `official`
 
 # 详细的参数解释 (Detailed parameters)
 
@@ -81,7 +82,7 @@ Delete all and use it as the first time.
 |extra|Y   video storyboard|
 |rank_achieved|Y   XH X SH S A B C D|
 |played|N   played unplayed|
-|下方为自定义搜索参数(custom search parameters below)||
+|下方为自定义搜索参数(custom serch parameters below)||
 |created|时间格式，看下面 (Time format, see below)|
 |ranked|时间格式，看下面 (Time format, see below)|
 |star|不解释 (will not explain)|
@@ -90,11 +91,11 @@ Delete all and use it as the first time.
 |cs|不解释 (will not explain)|
 |hp|不解释 (will not explain)|
 |length|不解释 (will not explain)|
+|bpm|不解释 (will not explain)|
 |下方为其他参数 (other parameters below)||
 |count|下载数量 (Download number)|
-|mirror|镜像站，目前只支持官方 (mirror, now only support official)|
-|sayo_sem|暂时没用 (Temporarily useless)|
-|official_sem|官方并发数 (The official number of concurrent)|
+|mirror|镜像站，支持"official" "sayobot" (download mirror, now support "official" and "sayobot")|
+|download_sem|下载并发数 (Download concurrent)|
 
 可以拼接的参数之间使用英文句号进行拼接
 
@@ -198,19 +199,17 @@ Standard json did not allow annotation. So please remove after copy
             "min": null,
             "max": null,
             "eq": true
+        },
+        "bpm": {
+          "min": null,
+          "max": null,
+          "eq": True
         }
     },
     "other": {
         "count": 200,
         "mirror": "official",
-        "sayo_sem": {
-            "query": 30,
-            "download": 10,
-            "use_official": false
-        },
-        "official_sem": {
-            "download": 5
-        }
+        "download_sem": 5
     }
 }
 ```
