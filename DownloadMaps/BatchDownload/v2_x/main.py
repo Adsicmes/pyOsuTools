@@ -134,6 +134,9 @@ def on_download_error():
 
 
 def download_progress_define(total_count):
+    """
+    定义了下载进度的样式
+    """
     download_progress = Progress(
         "{task.description}",
         # 添加的效果从左到右排列
