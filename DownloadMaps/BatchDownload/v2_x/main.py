@@ -323,6 +323,11 @@ if __name__ == "__main__":
             "min": None,
             "max": None,
             "eq": True
+        },
+        "bpm": {
+            "min": None,
+            "max": None,
+            "eq": True
         }
     }
 
