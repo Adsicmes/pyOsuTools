@@ -16,8 +16,6 @@ from packages.osu_db.osu_db import read_osu_db
 from packages.osuApiV2 import AsyncLoginClient
 from packages.sayobotApi import AsyncSayobot
 
-from loguru import logger
-
 
 illegal_chars = re.compile(r"[\<\>:\"\/\\\|\?*]")
 
@@ -271,27 +269,24 @@ async def main(params):
     print(f"[yellow]参数内填写的是{mirror}")
     print(f"[yellow]Its '{mirror}' you fill in your config.json")
 
-    try:
-        if mirror == 'official':
-            client = AsyncLoginClient()
-            await client.login(
-                params['api']['username'],
-                params['api']['password']
-            )
-        elif mirror == 'sayobot':
-            client = AsyncSayobot()
-        else:
-            client = None
-            print(f"[red]镜像参数填写有误,或不支持或填写错误 - {mirror}")
-            print(f"[red]Error on param mirror. May not support {mirror}")
-            print(f"按下回车退出")
-            print(f"Press Enter to exit.")
-            input()
-            exit(1)
+    if mirror == 'official':
+        client = AsyncLoginClient()
+        await client.login(
+            params['api']['username'],
+            params['api']['password']
+        )
+    elif mirror == 'sayobot':
+        client = AsyncSayobot()
+    else:
+        client = None
+        print(f"[red]镜像参数填写有误,或不支持或填写错误 - {mirror}")
+        print(f"[red]Error on param mirror. May not support {mirror}")
+        print(f"按下回车退出")
+        print(f"Press Enter to exit.")
+        input()
+        exit(1)
 
-        await download_maps(params, scraped_maps, client)
-    except Exception as e:
-        logger.exception(e)
+    await download_maps(params, scraped_maps, client)
 
     print(f"[green]下载完毕，按下回车退出")
     print(f"[green]Download success. Press Enter to exit.")
