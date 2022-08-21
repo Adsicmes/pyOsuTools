@@ -203,7 +203,7 @@ Standard json did not allow annotation. So please remove after copy
         "bpm": {
           "min": null,
           "max": null,
-          "eq": True
+          "eq": true
         }
     },
     "other": {
