@@ -125,6 +125,11 @@ async def scrape_maps(params, sid_existed) -> list:
                 print(f"达到了要求的{params['other']['count']}张铺面")
                 print(f"Reached the requirements of quantity {params['other']['count']}")
                 break
+
+            if resp['cursor_string'] is None:
+                print(f"[yellow]官方没图啦！这次一共获取了{len(beatmap_list)}张铺面")
+                print(f"[yellow]No map to append. Get {len(beatmap_list)} maps in total.")
+                break
     return beatmap_list
 
 
