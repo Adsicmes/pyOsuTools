@@ -3,6 +3,7 @@ import json
 import asyncio
 import re
 
+from loguru import logger
 from retrying import retry
 
 from rich import print
@@ -389,4 +390,7 @@ if __name__ == "__main__":
     params = json.load(open("config.json", "r"))
 
     # 运行主程序
-    asyncio.get_event_loop().run_until_complete(main(params))
+    try:
+        asyncio.get_event_loop().run_until_complete(main(params))
+    except Exception as e:
+        logger.exception(e)
