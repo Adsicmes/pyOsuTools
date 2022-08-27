@@ -95,7 +95,7 @@ class WriteBuffer:
         if len(data) > 0:
             self.write_ubyte(0x0b)
             strlen = b""
-            value = len(data)
+            value = len(data.encode('utf-8'))
             while value != 0:
                 byte = (value & 0x7F)
                 value >>= 7
@@ -103,7 +103,7 @@ class WriteBuffer:
                     byte |= 0x80
                 strlen += struct.pack("<B", byte)
             self.data += strlen
-            self.data += struct.pack("<" + str(len(data)) +
+            self.data += struct.pack("<" + str(len(data.encode("utf-8"))) +
                                      "s", data.encode("utf-8"))
         else:
             self.write_ubyte(0x0)
