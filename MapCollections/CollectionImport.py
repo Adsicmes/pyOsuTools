@@ -4,6 +4,7 @@ import pickle
 import re
 
 from retrying import retry
+from loguru import logger
 from rich import print
 from rich.live import Live
 from rich.panel import Panel
@@ -339,4 +340,7 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.get_event_loop().run_until_complete(main())
+    try:
+        asyncio.get_event_loop().run_until_complete(main())
+    except Exception as e:
+        logger.exception(e)
