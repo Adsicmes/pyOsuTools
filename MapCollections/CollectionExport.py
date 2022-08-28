@@ -30,10 +30,12 @@ async def main():
         f"[green]collection.db Version: {collections['version']}\n"
         f"[green]Collection num: {collections['num_collections']}\n"
         f"[green]===========================================================\n"
+        f"[yellow]没有问题的话按下回车继续...\n"
         f"[yellow]If theres no wrong. Press Enter to continue..."
     )
     input()
 
+    print("以下是你的所有收藏夹，输入前边的标号并按下回车来导出")
     print("Here is all your collections, input the serial number to export...")
     print("===========================================================")
 
@@ -43,7 +45,8 @@ async def main():
         n += 1
 
     print("===========================================================")
-    print("[yellow]If you want to export more than one, use ',' to split the number.")
+    print("[yellow]如果想导出多个收藏夹，用逗号来分割那些序号(不要乱加空格)")
+    print("[yellow]If you want to export more than one, use ',' to split the number.(Dont input space.)")
     selection = input("Which to export: ")
 
     if ',' in selection:
@@ -73,7 +76,8 @@ async def main():
 
         pickle.dump(coll, open(f"collections_export/{osu_db['name']} - {coll['coll_name']}.colldb", 'wb'))
 
-    print("[green]Please check the collections_export folder.Press enter to exit.")
+    print("[green]导出到了collections_export文件夹，按下回车退出...")
+    print("[green]Please check the collections_export folder.Press enter to exit...")
     input()
 
 
