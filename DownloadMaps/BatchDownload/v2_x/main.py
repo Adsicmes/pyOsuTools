@@ -114,10 +114,11 @@ async def scrape_maps(params, sid_existed) -> list:
                 if beatmapset['id'] in sid_existed:
                     exist += 1
                     continue
+                else:
+                    # 根据官方铺面搜索结果，非已经存在的铺面就是符合条件的铺面
+                    added += 1
+                    beatmap_list.append(beatmapset)
 
-                # 根据官方铺面搜索结果，非已经存在的铺面就是符合条件的铺面
-                added += 1
-                beatmap_list.append(beatmapset)
             print(f'[green]本次添加了{added}张铺面进入待下载列表')
             print(f'[green]Added {added} beatmapsets to pre-download list')
 
@@ -231,10 +232,6 @@ async def download_maps(params, scraped_maps, client):
 
     # 并发数设置
     sem = asyncio.Semaphore(params['other']['download_sem'])
-
-    # 初始化ppy客户端
-    login_client = AsyncLoginClient()
-    await login_client.login(params['api']['username'], params['api']['password'])
 
     # 获取songs的目录
     songs_dir = songsDir()
