@@ -278,7 +278,7 @@ async def map_download(maps_to_download: dict, mirror: str, sem: int):
         beatmap = {
             'id': sid,
             'artist': map_detail['artist'],
-            'title': map_detail['title']
+            'title': map_detail['song_title']
         }
 
         tasks.append(
