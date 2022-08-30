@@ -6,7 +6,7 @@ Document follows the latest version, the old version does not support
 
 这是一款osu的铺面批量下载器，可以从ppy搜索爬取指定数量的图并进行下载
 
-It is an osu pavement batch downloader. It can get a specifies quantity of beatmaps fit your filter.
+It is an osu beatmaps batch downloader. It can get a specifies quantity of beatmaps fit your filter.
 
 ### 现在支持的参数 (support parameters)
 
@@ -137,6 +137,8 @@ Such as parameter general can be `"recommended.spotlights"`
 标准的json格式不允许注释的存在，所以记得删掉
 
 Standard json did not allow annotation. So please remove after copy
+
+下面的配置可以`从官方`下载 `所有rank状态的` `仅日语的` `std的` `带有视频或者故事板的` `可能包含r18的` `2018年1月1日到2021年1月1日年间创建的` `6-8星的` `cs4-6的` `200张`铺面，并且`最大同时下载数量为5`
 
 ```json
 {
